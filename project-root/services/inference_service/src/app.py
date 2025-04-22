@@ -34,7 +34,10 @@ app = FastAPI(title="CIFAR‑10 ResNet Inference")
 
 @app.get("/health")
 def health() -> Dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok",
+            "service": "inference-service",
+            "version": "1.0.0",
+            "model_type": "resnet18"}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
