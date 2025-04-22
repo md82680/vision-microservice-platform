@@ -11,9 +11,4 @@ client = TestClient(app)
 def test_health_ok():
     r = client.get("/health")
     assert r.status_code == 200
-    response = r.json()
-    assert response["status"] == "ok"
-    assert "service" in response
-    assert "version" in response
-    assert "model_type" in response
-    assert response["model_type"] == "resnet18"
+    assert r.json() == {"status": "ok"}
