@@ -1,7 +1,13 @@
 import io, random
 from fastapi.testclient import TestClient
 from PIL import Image
-from src.app import app, CLASSES
+
+try:
+    from src.app import app, CLASSES
+except ImportError:
+    import sys, os
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    from src.app import app, CLASSES
 
 client = TestClient(app)
 

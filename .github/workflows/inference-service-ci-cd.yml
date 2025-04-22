@@ -25,7 +25,8 @@ jobs:
       working-directory: services/inference_service
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt pytest
+        pip install -r requirements.txt
+        pip install pytest python-multipart
         # Run pytest with the correct Python path
         PYTHONPATH=. pytest -q tests
 
