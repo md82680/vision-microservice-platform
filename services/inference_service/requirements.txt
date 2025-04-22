@@ -5,3 +5,4 @@ torchvision==0.21.0
 pillow>=10.2
 pytest
 httpx # FastAPI TestClient's async transport
+python-multipart # Required for file uploads
