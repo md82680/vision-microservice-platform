@@ -1,0 +1,10 @@
+name: inference_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pytorch=2.2.2
+  - torchvision=0.17.2
+  - fastapi
+  - uvicorn
+  - pillow

@@ -1,0 +1,5 @@
+fastapi>=0.111
+uvicorn[standard]>=0.29
+torch==2.6.0          # or whatever Colab used
+torchvision==0.17.2
+pillow>=10.2
