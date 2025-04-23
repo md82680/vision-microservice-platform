@@ -61,7 +61,7 @@ jobs:
     - name: Deploy to GKE
       run: |
         # Update deployment.yaml with the specific image we just built
-        sed -i "s|gcr.io/PROJECT_ID/inference:latest|gcr.io/${{ secrets.GCP_PROJECT }}/inference-service:${{ github.sha }}|g" services/inference_service/k8s/deployment.yaml
+        sed -i "s|gcr.io/PROJECT_ID/inference:latest|gcr.io/${{ secrets.GCP_PROJECT }}/inference:${{ github.sha }}|g" services/inference_service/k8s/deployment.yaml
         
         # Apply Kubernetes configurations
         kubectl apply -f services/inference_service/k8s/deployment.yaml
