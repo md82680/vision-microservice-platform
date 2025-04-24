@@ -1,0 +1,8 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+httpx>=0.28.0         # HTTP client for service-to-service communication
+pydantic>=2.7.0       # Data validation
+python-multipart      # Form/file upload handling
+tenacity>=8.4.0       # Retries for resilient service calls
+python-jose[cryptography]>=3.3.0  # JWT token handling (for auth)
+prometheus-client>=0.20.0         # Metrics collection 

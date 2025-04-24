@@ -1,0 +1,121 @@
+name: Training Service CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'services/training_service/**'
+      - '.github/workflows/training-service-ci-cd.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'services/training_service/**'
+      - '.github/workflows/training-service-ci-cd.yml'
+
+env:
+  DOCKER_REGISTRY: ghcr.io/${{ github.repository_owner }}
+  SERVICE_NAME: training-service
+  SERVICE_PATH: services/training_service
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ${{ env.SERVICE_PATH }}/requirements.txt
+      
+      - name: Run tests
+        run: |
+          cd ${{ env.SERVICE_PATH }}
+          pytest -xvs tests/
+
+  build-and-push:
+    name: Build and Push Docker Image
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Generate Image Tags
+        id: tags
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "::set-output name=short_sha::${SHORT_SHA}"
+          echo "::set-output name=version::${SHORT_SHA}"
+      
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ env.SERVICE_PATH }}
+          file: ${{ env.SERVICE_PATH }}/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ steps.tags.outputs.version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.SERVICE_NAME }}:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.SERVICE_NAME }}:latest
+          cache-to: type=inline
+
+  deploy:
+    name: Deploy to Kubernetes
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+      
+      - name: Set up Kube config
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+      
+      - name: Generate Image Tags
+        id: tags
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "::set-output name=short_sha::${SHORT_SHA}"
+          echo "::set-output name=version::${SHORT_SHA}"
+      
+      - name: Deploy to Kubernetes
+        run: |
+          cd ${{ env.SERVICE_PATH }}/k8s
+          
+          # Apply PVCs if they don't exist
+          kubectl apply -f persistent-volumes.yaml || true
+          
+          # Update image in deployment manifest
+          cat deployment.yaml | sed "s|\${DOCKER_REGISTRY}|${{ env.DOCKER_REGISTRY }}|g" | sed "s|\${VERSION}|${{ steps.tags.outputs.version }}|g" > deployment_updated.yaml
+          
+          # Apply deployment and service
+          kubectl apply -f deployment_updated.yaml
+          kubectl apply -f service.yaml
+          
+          # Wait for deployment to be ready
+          kubectl rollout status deployment/${{ env.SERVICE_NAME }} 

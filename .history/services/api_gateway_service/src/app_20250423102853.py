@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 # Constants
 INFERENCE_SERVICE_URL = os.getenv("INFERENCE_SERVICE_URL", "http://inference-service")
-TRAINING_SERVICE_URL = os.getenv("TRAINING_SERVICE_URL", "http://training-service")
 
 # Prometheus metrics
 REQUESTS = Counter('api_gateway_requests_total', 'Total requests to API Gateway', ['path', 'method', 'status'])
@@ -103,88 +102,6 @@ async def predict_proxy(file: UploadFile = File(...)):
             return response.json()
     except httpx.HTTPStatusError as e:
         logger.error(f"Error calling inference service: {str(e)}")
-        raise HTTPException(status_code=e.response.status_code, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-# ─── Training Service Endpoints ────────────────────────────────────────────────────
-
-@app.post("/train")
-async def train_model(request: Request):
-    """Start a new model training job"""
-    try:
-        # Forward the training request
-        json_data = await request.json()
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{TRAINING_SERVICE_URL}/train",
-                json=json_data
-            )
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"Error calling training service: {str(e)}")
-        raise HTTPException(status_code=e.response.status_code, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-@app.get("/jobs/{job_id}")
-async def get_job_status(job_id: str):
-    """Get the status of a specific training job"""
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{TRAINING_SERVICE_URL}/jobs/{job_id}")
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"Error calling training service: {str(e)}")
-        raise HTTPException(status_code=e.response.status_code, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-@app.get("/jobs")
-async def list_jobs():
-    """List all training jobs"""
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{TRAINING_SERVICE_URL}/jobs")
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"Error calling training service: {str(e)}")
-        raise HTTPException(status_code=e.response.status_code, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-@app.get("/models")
-async def list_models():
-    """List all available trained models"""
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{TRAINING_SERVICE_URL}/models")
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"Error calling training service: {str(e)}")
-        raise HTTPException(status_code=e.response.status_code, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-@app.get("/models/{model_id}")
-async def get_model(model_id: str):
-    """Get details for a specific model"""
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{TRAINING_SERVICE_URL}/models/{model_id}")
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"Error calling training service: {str(e)}")
         raise HTTPException(status_code=e.response.status_code, detail=str(e))
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")

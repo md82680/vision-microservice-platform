@@ -1,0 +1,6 @@
+name: api_gateway_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  # other dependencies
