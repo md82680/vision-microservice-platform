@@ -1,0 +1,48 @@
+.PHONY: start stop clean
+
+# Start all services
+start:
+	@echo "Starting all services..."
+	@echo "Starting API Gateway Service..."
+	cd services/api_gateway_service && conda activate api_gateway_env && uvicorn src.app:app --host 0.0.0.0 --port 8000 &
+	@echo "Starting Inference Service..."
+	cd services/inference_service && conda activate inference_service_env && uvicorn src.app:app --host 0.0.0.0 --port 8001 &
+	@echo "Starting Training Service..."
+	cd services/training_service && conda activate training_service_env && uvicorn src.app:app --host 0.0.0.0 --port 8002 &
+	@echo "Starting Frontend Service..."
+	cd services/frontend_service && npm start &
+	@echo "All services started! Frontend available at http://localhost:3000"
+
+# Stop all services
+stop:
+	@echo "Stopping all services..."
+	@pkill -f "uvicorn src.app:app" || true
+	@pkill -f "node.*react-scripts" || true
+	@pkill -f "node.*start.js" || true
+	@pkill -f "npm start" || true
+	@echo "All services stopped"
+
+# Clean up
+clean:
+	@echo "Cleaning up..."
+	@rm -rf services/frontend_service/node_modules
+	@rm -rf services/frontend_service/build
+	@echo "Cleanup complete"
+
+# Install dependencies
+install:
+	@echo "Installing dependencies..."
+	@cd services/frontend_service && npm install
+	@cd services/api_gateway_service && pip install -r requirements.txt
+	@cd services/inference_service && pip install -r requirements.txt
+	@cd services/training_service && pip install -r requirements.txt
+	@echo "Dependencies installed"
+
+# Help
+help:
+	@echo "Available commands:"
+	@echo "  make start    - Start all services"
+	@echo "  make stop     - Stop all services"
+	@echo "  make clean    - Clean up build artifacts"
+	@echo "  make install  - Install all dependencies"
+	@echo "  make help     - Show this help message" 

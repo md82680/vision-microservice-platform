@@ -1,0 +1,66 @@
+# Frontend Service
+services/frontend_service/build/
+services/frontend_service/node_modules/
+services/frontend_service/.env
+services/frontend_service/.env.local
+services/frontend_service/.env.development.local
+services/frontend_service/.env.test.local
+services/frontend_service/.env.production.local
+services/frontend_service/npm-debug.log*
+services/frontend_service/yarn-debug.log*
+services/frontend_service/yarn-error.log*
+
+# Python Services
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/*.so
+**/.Python
+**/env/
+**/.env
+**/.pytest_cache/
+**/.coverage
+**/htmlcov/
+**/*.egg-info/
+**/dist/
+**/build/
+
+# Conda environments (service-specific)
+services/inference_service/.conda/
+services/training_service/.conda/
+services/api_gateway_service/.conda/
+
+# api gateway service
+
+# Infrastructure
+infra/**/.terraform/
+infra/**/*.tfstate
+infra/**/*.tfstate.*
+infra/**/.terraform.lock.hcl
+
+# Kubernetes
+**/k8s/**/*.yaml
+!**/k8s/**/kustomization.yaml
+
+# Docker
+**/Dockerfile
+**/.dockerignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
