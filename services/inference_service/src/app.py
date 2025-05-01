@@ -44,9 +44,9 @@ except Exception as e:
 
 # identical pre‑processing to training
 PRE = transforms.Compose([
-    transforms.Resize(32),  # CIFAR-10 images are 32x32
+    transforms.Resize(224),  # CIFAR-10 images are 32x32
     transforms.ToTensor(),
-    transforms.Normalize((0.5,)*3, (0.5,)*3),
+    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616)),  # CIFAR-10 stats
 ])
 
 # ─── FastAPI setup ─────────────────────────────────────────────────────────────
