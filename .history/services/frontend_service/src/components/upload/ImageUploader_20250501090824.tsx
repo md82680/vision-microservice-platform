@@ -6,8 +6,6 @@ import { uploadImage } from '../../services/api';
 interface ImageUploaderProps {
   onPrediction: (prediction: any) => void;
   onError: (error: string) => void;
-  isLoading?: boolean;
-  setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface FastAPIError {
@@ -15,19 +13,10 @@ interface FastAPIError {
   message?: string;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ 
-  onPrediction, 
-  onError,
-  isLoading: externalIsLoading,
-  setIsLoading: externalSetIsLoading 
-}) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ onPrediction, onError }) => {
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [internalIsLoading, setInternalIsLoading] = useState(false);
-  
-  // Use external loading state if provided, otherwise use internal
-  const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
-  const setIsLoading = externalSetIsLoading || setInternalIsLoading;
+  const [isLoading, setIsLoading] = useState(false);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -80,7 +69,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [onPrediction, onError, setIsLoading]);
+  }, [onPrediction, onError]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

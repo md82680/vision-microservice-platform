@@ -33,8 +33,6 @@ const Home: React.FC = () => {
             <ImageUploader 
               onPrediction={handlePrediction}
               onError={handleError}
-              isLoading={isLoading}
-              setIsLoading={setIsLoading}
             />
             {isLoading && (
               <div className="mt-4">
